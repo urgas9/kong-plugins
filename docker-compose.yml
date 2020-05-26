@@ -1,0 +1,44 @@
+version: '3.4'
+
+x-kong-common-variables: &kong-common-variables
+  KONG_DATABASE: postgres
+  KONG_PG_USER: kong_dev_user
+  KONG_PG_PASSWORD: 123
+  KONG_PG_HOST: postgresql
+  KONG_PG_DATABASE: kong_dev_db
+  KONG_PG_PORT: 5432
+
+services:
+
+  kong-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - kong-db-migrations
+    environment:
+      <<: *kong-common-variables
+
+  kong-db-migrations:
+    entrypoint: kong migrations up --v
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgresql
+    environment:
+      <<: *kong-common-variables
+
+  postgresql:
+    image: postgres:9.5-alpine
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./scripts/db/10-init.sql:/docker-entrypoint-initdb.d/10-init.sql
