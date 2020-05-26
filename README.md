@@ -9,7 +9,7 @@ error to a new one (hardcoded in [logic](./error-transformer/body_transformer.lu
 returns that one in the response payload instead. Could be easily modified to read messages from database.
 
 
-### How to install plugins
+## How to install plugins
 
 The plugin must reside in the right folder, so Kong is aware of the plugin. Also you must update the `plugins` config to
 tell Kong which plugin to load up on boot.
